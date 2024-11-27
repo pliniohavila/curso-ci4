@@ -56,14 +56,44 @@
         beforeSend: function() {
           $('#response').html('')
           $('#btn-salvar').html('Aguarde...')
+          $('#btn-salvar').html('Aguarde...')
         }, 
         success: function(response) {
+          $('#btn-salvar').html('Salvar')
+          $('#btn-salvar').removeAttr('disabled')
+
+          $('[name=csrf_ordem]').val(response.token)
+          if (!response.erro && !response.erros_model) {
+            
+            if (response.info) {
+              $('#response').html(`<div class="alert alert-primary">${response.info}</div>`)
+            } else {
+              window.location.href = `<?php echo site_url("usuarios/exibir/$usuario->id"); ?>`
+            }
+          }
+
+          if (response.erro)
+            $('#response').html(`<div class="alert alert-danger">${response.erro}</div>`)
+            
+          if (response.erros_model) {
+              $.each(response.erros_model, function (key, value) {
+                // $('#response').append(`<ul class="list-unstyled"><li class="text-danger">value</li></ul>`)
+                $('#response').append(`<div class="alert alert-danger mt-0">${value}</div>`)
+              })
+            }
+        }, 
+        error: function() {
+          alert('Ocorreu um erro no back-end')
           $('#btn-salvar').html('Salvar')
           $('#btn-salvar').removeAttr('disabled')
         }
       })
 
     })
+
+    // $("#form").submit(function() {
+    //   $(this).find(":submit").attr('disable', 'disabled')
+    // })
   })
 
 </script>

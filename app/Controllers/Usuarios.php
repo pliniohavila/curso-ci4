@@ -75,7 +75,11 @@ class Usuarios extends BaseController
 
         $post = $this->request->getPost();
 
-        
+
+        $retorno = ['token' => csrf_hash()];
+        $retorno['erros_model'] = ['erro1', 'erro2', 'erro3'];
+        sleep(5);
+        return $this->response->setJSON($retorno);
     }
 
     public function editarImagem(int $id)
