@@ -75,7 +75,15 @@ class Usuarios extends BaseController
 
         $post = $this->request->getPost();
 
+        $response['token'] = csrf_hash();
+
+        $usuario = $this->buscaUsuarioOu404($post['id']);
+        $usuario->fill($post);
         
+        if ($usuario->hasChanged() == false) 
+            $response['info'] = 'Não dados para serem atualizados!';
+
+        return $this->response->setJSON($response);        
     }
 
     public function editarImagem(int $id)

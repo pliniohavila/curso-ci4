@@ -23,7 +23,7 @@ class UsuarioFakerSeeder extends Seeder
                 'nome' => $faker->unique()->name,
                 'email' => $faker->unique()->email(),
                 'password_hash' => '123456', 
-                'ativo' => true
+                'ativo' => ($i % 2 == 0) ? true : false
             ]);
         }
 
@@ -32,6 +32,6 @@ class UsuarioFakerSeeder extends Seeder
             ->protect(false) // bypass protect in allowedFields
             ->insertBatch($usuariosPush);
      
-        echo "$criarQuantosUsuarios semeados com sucesso!";
+        echo "$criarQuantosUsuarios semeados com sucesso!" . PHP_EOL;
     }
 }

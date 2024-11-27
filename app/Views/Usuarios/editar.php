@@ -12,7 +12,7 @@
 
 <?= $this->section('conteudo') ?>
 <div class="row">
-  <div class="col-lg-5">
+  <div class="col-6">
     <div class="block">
       
       <div class="block-body">

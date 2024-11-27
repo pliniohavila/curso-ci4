@@ -38,7 +38,7 @@ class CriaTabelaUsuarios extends Migration
                 'null' => true,
                 'default' => null
             ],
-            'image' => [
+            'imagem' => [
                 'type' => 'VARCHAR', 
                 'constraint' => '256',
                 'null' => true,
