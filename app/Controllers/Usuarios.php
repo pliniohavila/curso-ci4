@@ -6,6 +6,7 @@ use App\Controllers\BaseController;
 use App\Models\UsuarioModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\Database\Exceptions\DataException;
 
 class Usuarios extends BaseController
 {
@@ -40,7 +41,7 @@ class Usuarios extends BaseController
                 'imagem' => $usuario->imagem,
                 'nome' => anchor("/usuarios/exibir/$usuario->id", $nomeUsuario, "title='Exibir $nomeUsuario'"),
                 'email' => esc($usuario->email),
-                'ativo' => ($usuario->ativo == true) ? '<i class="fa fa-unlock"></i>&nbsp;Ativo' : 'fa fa-lock"></i>&nbsp;<span class="warning">Inativo</span>',
+                'ativo' => ($usuario->ativo == true) ? '<i class="fa fa-unlock"></i>&nbsp;Ativo' : '<i class="fa fa-lock"></i>&nbsp;<span class="text-warning">Inativo</span>',
             ];
         }
 
@@ -73,17 +74,27 @@ class Usuarios extends BaseController
         if (!$this->request->isAJAX())
             return redirect()->back();
 
-        $post = $this->request->getPost();
-
         $response['token'] = csrf_hash();
+        
+        $post = $this->request->getPost();
+        if (empty($post['password'])) {
+            unset($post['password']);
+            unset($post['password_confirmation']);
+        }
 
         $usuario = $this->buscaUsuarioOu404($post['id']);
         $usuario->fill($post);
+        if (!$usuario->hasChanged()) {
+            $response['info'] = 'Não há novos dados para serem atualizados!';
+            return $this->response->setJSON($response);   
+        }
+            
+        if ($this->usuarioModel->protect(false)->save($usuario)) 
+            return $this->response->setJSON($response);
         
-        if ($usuario->hasChanged() == false) 
-            $response['info'] = 'Não dados para serem atualizados!';
-
-        return $this->response->setJSON($response);        
+        $response['erro'] = 'Por favor, verifique os erros abaixo e tente novamente';
+        $response['erros_model'] = $this->usuarioModel->erros();
+        return $this->response->setJSON($response);
     }
 
     public function editarImagem(int $id)

@@ -64,7 +64,6 @@
 
           $('[name=csrf_ordem]').val(response.token)
           if (!response.erro && !response.erros_model) {
-            
             if (response.info) {
               $('#response').html(`<div class="alert alert-primary">${response.info}</div>`)
             } else {
