@@ -14,7 +14,7 @@
 <div class="row">
   <div class="col-5">
     <div class="block">
-      
+           
     <div class="text-center">
         <?php if ($usuario->imagem == null): ?>
           <img src="<?php echo site_url('recursos/img/user-icon.png'); ?>" alt="Usuário Sem Imagem" class="card-img-top" style="width: 90%;" />

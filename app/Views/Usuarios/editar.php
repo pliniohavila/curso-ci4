@@ -77,7 +77,7 @@
           if (response.erros_model) {
               $.each(response.erros_model, function (key, value) {
                 // $('#response').append(`<ul class="list-unstyled"><li class="text-danger">value</li></ul>`)
-                $('#response').append(`<div class="alert alert-danger mt-0">${value}</div>`)
+                $('#response').append(`<p class="alert-danger mt-0">${value}</p>`)
               })
             }
         }, 

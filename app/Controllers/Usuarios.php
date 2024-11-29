@@ -89,11 +89,15 @@ class Usuarios extends BaseController
             return $this->response->setJSON($response);   
         }
             
-        if ($this->usuarioModel->protect(false)->save($usuario)) 
+        if ($this->usuarioModel->protect(false)->save($usuario)) {
+            session()->setFlashdata('sucesso', 'Usuário atualizado com sucesso!');
             return $this->response->setJSON($response);
+        }
+            
         
         $response['erro'] = 'Por favor, verifique os erros abaixo e tente novamente';
-        $response['erros_model'] = $this->usuarioModel->erros();
+        $response['erros_model'] = $this->usuarioModel->errors();
+
         return $this->response->setJSON($response);
     }
 
