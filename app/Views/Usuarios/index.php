@@ -15,6 +15,11 @@
 <?= $this->section('conteudo') ?>
 <div class="col-lg-12">
   <div class="block">
+
+    <div class="d-flex justify-content-end">
+      <a href="<?php echo site_url('usuarios/criar'); ?>" class="btn btn-danger mb-4">Criar Novo Usuário</a>
+    </div>
+
     <div class="title"><strong>Relação de Usuários</strong></div>
     <div class="table-responsive">
       <table class="table table-striped table-sm" id="ajaxTable" style="width: 100%;">

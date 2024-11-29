@@ -197,6 +197,9 @@ class Mimes
             'application/x-bmp',
             'application/x-win-bitmap',
         ],
+        'webp' => [
+            'image/webp'
+        ],
         'gif' => 'image/gif',
         'jpg' => [
             'image/jpeg',
