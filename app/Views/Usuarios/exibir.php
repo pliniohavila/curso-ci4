@@ -12,14 +12,14 @@
 
 <?= $this->section('conteudo') ?>
 <div class="row">
-  <div class="col-5">
+  <div class="col-4">
     <div class="block">
            
     <div class="text-center">
         <?php if ($usuario->imagem == null): ?>
           <img src="<?php echo site_url('recursos/img/user-icon.png'); ?>" alt="Usuário Sem Imagem" class="card-img-top" style="width: 90%;" />
         <?php else: ?>
-          <img src="<?php echo site_url("usuario/imagem/$usuario->imagem"); ?>" alt="<?php echo esc($usuario->nome); ?>" class="card-img-top" style="width: 90%;" />
+          <img src="<?php echo site_url("usuarios/imagem/$usuario->imagem"); ?>" alt="<?php echo esc($usuario->nome); ?>" class="card-img-top" style="width: 90%;" />
         <?php endif; ?>
         <a href="<?php echo site_url("usuarios/editarImagem/$usuario->id"); ?>" class="btn btn-outline-primary btn-sm mt-3">Alterar imagem</a>
       </div>

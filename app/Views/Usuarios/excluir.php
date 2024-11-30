@@ -17,21 +17,14 @@
       
       <div class="block-body">
 
-        <!-- Exibirá os retornos do back-end -->
-        <div id="response"></div>
+        <?php echo form_open_multipart('/usuarios/excluir/' . $usuario->id); ?>
 
-        <?php echo form_open_multipart('/', ['id' => 'form'], ['id' => "$usuario->id"]); ?>
-
-        <div class="form-group">
-          <label class="form-control-label">Escolha uma imagem</label>
-          <input type="file" name="imagem" class="form-control"  accept="image/png, image/gif, image/jpeg" />
+        <div class="alert alert-warning" role="alert">
+          Tem deseja que excluir o usuário: <strong><?php echo $usuario->nome ?></strong> ?
         </div>
-    
 
-        <div class="form-group mt-5 mb-4">
-
-          <input type="submit" value="Salvar" id="btn-salvar" class="btn btn-danger w-100 mt-2" />
-          <a href="<?php echo site_url("usuarios"); ?>" class="btn btn-secondary w-100 mt-2">Voltar</a>
+        <input type="submit" value="Excluir" id="btn-danger" class="btn btn-danger w-100 mt-2" />
+        <a href="<?php echo site_url("usuarios/exibir/$usuario->id"); ?>" class="btn btn-info w-100 mt-2">Cancelar</a>
         </div>
 
         <?php echo form_close(); ?>

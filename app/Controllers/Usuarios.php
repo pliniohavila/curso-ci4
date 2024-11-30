@@ -23,7 +23,7 @@ class Usuarios extends BaseController
             'titulo' => 'Listando os usuários do sistema'
         ];
 
-        return view('Usuarios/index', $data);
+        return view('usuarios/index', $data);
     }
 
     public function criar(): string
@@ -71,14 +71,32 @@ class Usuarios extends BaseController
         if (!$this->request->isAJAX())
             return redirect()->back();
         $attr = ['id', 'nome', 'email', 'ativo', 'imagem'];
-        $usuarios = $this->usuarioModel->select($attr)->orderBy('id', 'DESC')->findAll();  
+        $usuarios = $this->usuarioModel->select($attr)->orderBy('nome', 'ASC')->findAll();  
         
         $data = [];
 
         foreach($usuarios as $usuario) {
             $nomeUsuario = esc($usuario->nome);
+
+            // $imagem = null;
+            if(!is_null($usuario->imagem)) {
+                $imagem = [
+                    'src' => site_url("usuarios/imagem/$usuario->imagem"), 
+                    'class' => 'rounded img-fluid', 
+                    'alt' => esc($usuario->nome), 
+                    'width' => '50'
+                ];
+            } else {
+                $imagem = [
+                    'src' => site_url("recursos/img/user-icon.png"), 
+                    'class' => 'rounded img-fluid', 
+                    'alt' => 'Usuário sem imagem', 
+                    'width' => '50'
+                ];
+            }
+
             $data[] = [
-                'imagem' => $usuario->imagem,
+                'imagem' => img($imagem),
                 'nome' => anchor("/usuarios/exibir/$usuario->id", $nomeUsuario, "title='Exibir $nomeUsuario'"),
                 'email' => esc($usuario->email),
                 'ativo' => ($usuario->ativo == true) ? '<i class="fa fa-unlock"></i>&nbsp;Ativo' : '<i class="fa fa-lock"></i>&nbsp;<span class="text-warning">Inativo</span>',
@@ -188,21 +206,53 @@ class Usuarios extends BaseController
             return $this->response->setJSON($response);
         }
 
-        $caminhoImagem = $imagem->store('usuarios');
-        $imagemCaminho = WRITEPATH . 'uploads\\' . $caminhoImagem;
+        $imagemCaminho = $imagem->store('usuarios');
+        $caminhoImagem = WRITEPATH . 'uploads\\' . $imagemCaminho;
 
-        echo '<pre>';
-        print_r($imagemCaminho);
-        echo '</pre>';
-        exit;
-
+        service('image')
+            ->withFile($caminhoImagem)
+            ->fit(300, 300, 'center')
+            ->save($caminhoImagem);
         
-        $ususario = $this->buscaUsuarioOu404($post['id']);
+        // A partir daqui podemos atualizar a tabela usuários
+        $usuario = $this->buscaUsuarioOu404((int)$post['id']);
+        $imagemAntiga = $usuario->imagem;
+        if (!is_null($imagemAntiga))
+            $this->removeImagem($imagemAntiga);
 
+        $usuario->imagem = $imagem->getName();
+        $this->usuarioModel->save($usuario);
 
-        exit;
+        session()->setFlashdata('sucesso', 'Imagem Atualizada com Sucesso 😉');
+        return $this->response->setJSON($response);
     } 
 
+    public function excluir(int $id)
+    {
+        $usuario = $this->buscaUsuarioOu404($id);
+
+        if ($this->request->getMethod() === 'post') {
+            
+            if (!is_null($usuario->imagem))
+                $this->removeImagem($usuario->imagem);
+
+            $this->usuarioModel->delete($usuario->id);
+
+            return redirect()->to(site_url('usuarios'))->with('sucesso', "Usuário $usuario->nome Excluído com Sucesso.");
+        }
+    
+        $title = "Excluindo o Usuário: $usuario->nome";
+        $data = ['titulo' => $title, 'usuario' => $usuario];
+
+        return view('usuarios/excluir', $data);
+    }
+
+    public function imagem(string $imagem = null)
+    {
+        if (!is_null($imagem))
+            return $this->exibeArquivo('usuarios', $imagem);
+        return null;
+    }
 
     private function buscaUsuarioOu404(int $id = null)
     {
@@ -210,5 +260,12 @@ class Usuarios extends BaseController
             throw PageNotFoundException::forPageNotFound("Não encontramos o usuário $id");
 
         return $usuario;
+    }
+
+    private function removeImagem(string $imagem)
+    {
+        $caminhoImagem = WRITEPATH . 'uploads\\usuarios\\' . $imagem;
+        if (is_file($caminhoImagem)) 
+            return unlink($caminhoImagem);
     }
 }

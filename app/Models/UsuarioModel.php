@@ -22,9 +22,7 @@ class UsuarioModel extends Model
 
     // Validation
     protected $validationRules = [
-        'id'           => 'permit_empty|is_natural_no_zero', // <-- ESSA LINHA DEVE SER ADICIONADA
-        
-        // as existentes
+        'id'           => 'permit_empty|is_natural_no_zero',
         'nome'         => 'required|min_length[3]|max_length[125]',
         'email'        => 'required|valid_email|max_length[230]|is_unique[usuarios.email,id,{id}]', // Não pode ter espaços
         'password'     => 'required|min_length[6]',
