@@ -36,8 +36,8 @@ class GrupoModel extends Model
             'is_unique' => 'O Grupo informado já está cadastrado.',
         ],
         'descricao' => [
-            'required' => 'O campo Email é obrigatório.',
-            'max_length' => 'O campo Email não pode ter mais que 240 caracteres.',
+            'required' => 'O campo Descrição é obrigatório.',
+            'max_length' => 'O campo Descrição não pode ter mais que 240 caracteres.',
             
         ]
     ];

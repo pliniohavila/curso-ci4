@@ -83,10 +83,6 @@
       })
 
     })
-
-    // $("#form").submit(function() {
-    //   $(this).find(":submit").attr('disable', 'disabled')
-    // })
   })
 
 </script>

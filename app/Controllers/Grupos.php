@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Entities\Grupo;
 use App\Models\GrupoModel;
+use App\Models\GrupoPermissaoModel;
+use App\Models\PermissaoModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -12,10 +14,14 @@ use CodeIgniter\HTTP\ResponseInterface;
 class Grupos extends BaseController
 {
     private $grupoModel;
+    private $grupoPermissaoModel;
+    private $permissaoModel;
 
     public function __construct()
     {
         $this->grupoModel = new GrupoModel();
+        $this->grupoPermissaoModel = new GrupoPermissaoModel();
+        $this->permissaoModel = new PermissaoModel();
     }
 
     public function index(): string
@@ -72,7 +78,76 @@ class Grupos extends BaseController
         $title = "Excluindo o Grupo: $grupo->nome";
         $data = ['titulo' => $title, 'grupo' => $grupo];
 
-        return view('grupos/excluir', $data);
+        return view('Grupos/excluir', $data);
+    }
+
+    public function permissoes(int $id = null)
+    {
+        $grupo = $this->buscaGrupoOu404($id);
+
+        if (($grupo->id == 1) || ($grupo->id == 2))
+            return redirect()->back()->with('info', 'Não é possível alterar as permissões do grupo:' . $grupo->nome);
+
+        if ($grupo->id > 2) {
+            $grupo->permissoes = $this->grupoPermissaoModel->recuperaPermissoesDoGrupo($grupo->id, 5);
+            $grupo->pager = $this->grupoPermissaoModel->pager;
+        }
+
+        $title = 'Gerenciando as permissões do grupo de acesso: ' . esc($grupo->nome);
+        $data = ['titulo' => $title, 'grupo' => $grupo];
+
+        if (!empty($grupo->permissoes)) {
+            $permissoesExistentes = array_column($grupo->permissoes, 'permissao_id');
+            $data['permissoesDisponiveis'] = $this->permissaoModel->whereNotIn('id', $permissoesExistentes)->findAll();
+        } else {
+            $data['permissoesDisponiveis'] = $this->permissaoModel->findAll();
+        }
+
+        return view('Grupos/permissoes', $data);
+    }
+
+    public function salvarPermissoes(): ResponseInterface
+    {
+        if (!$this->request->isAJAX())
+            return redirect()->back();
+
+        $retorno['token'] = csrf_hash();
+
+        $post = $this->request->getPost();
+
+        $grupo = $this->buscaGrupoOu404($post['id']);
+
+        if (empty($post['permissao_id'])) {
+            $retorno['erro'] = 'Por favor, verifique os erros abaixo e tente novamente';
+            $retorno['erros_model'] = ['permissao_id' => 'Escolha uma ou mais permissão para salvar'];
+            return $this->response->setJSON($retorno);
+        }
+
+        $permissoesPush = [];
+        foreach ($post['permissao_id'] as $permissao) {
+            array_push($permissoesPush, [
+                'grupo_id' => $grupo->id,
+                'permissao_id' => $permissao
+            ]);
+        }
+
+        $this->grupoPermissaoModel->insertBatch($permissoesPush);
+
+        session()->setFlashData('sucesso', 'Permissões alteradas com sucesso!');
+        return $this->response->setJSON($retorno);   
+    }
+
+    public function removePermissao(int $permissaoId)
+    {
+        $retorno['token'] = csrf_hash();
+        
+        $permissao = $this->grupoPermissaoModel->find($permissaoId);
+
+        if (!$permissao)
+            return redirect()->back()->with('error', 'Permissão não encontrada');
+
+        $this->grupoPermissaoModel->delete($permissaoId);
+        return redirect()->back()->with('sucesso', "Permissão removida com sucesso.");
     }
 
     public function cadastrar(): ResponseInterface
