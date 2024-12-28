@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Entities\Usuario;
+use App\Models\GrupoModel;
+use App\Models\GrupoUsuarioModel;
 use App\Models\UsuarioModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -11,10 +13,14 @@ use CodeIgniter\HTTP\ResponseInterface;
 class Usuarios extends BaseController
 {
     private $usuarioModel;
+    private $grupoModel;
+    private $grupoUsuarioModel;
 
     public function __construct()
     {
         $this->usuarioModel = new UsuarioModel();
+        $this->grupoUsuarioModel = new GrupoUsuarioModel();
+        $this->grupoModel = new GrupoModel();
     }
 
     public function index(): string
@@ -254,12 +260,109 @@ class Usuarios extends BaseController
         return null;
     }
 
+    public function grupos(int $id)
+    {
+        $usuario = $this->buscaUsuarioOu404($id);
+
+        $usuario->grupos = $this->grupoUsuarioModel->recuperaGruposDoUsuario($id);
+        $usuario->pager = $this->grupoUsuarioModel->pager;
+    
+        $title = "Gerenciando os grupos de acesso do Usuário: $usuario->nome";
+        $data = ['titulo' => $title, 'usuario' => $usuario];
+
+        $gruposExistentes = array_column($usuario->grupos, 'grupo_id');     
+        
+        if (in_array(2, $gruposExistentes)) 
+            return redirect()->to(site_url("usuarios/exibir/$usuario->id"))->with('info', "Usuários do grupo de CLIENTES não podem ter o seu grupo alterado.");
+
+        if (in_array(1, $gruposExistentes)) {
+            $usuario->full_control = true;
+            return view('Usuarios/grupos', $data);
+        }
+
+        $usuario->full_control = false;
+
+        if (!empty($usuario->grupos))
+            $data['gruposDisponiveis'] = $this->grupoModel->where('id !=', 2)->whereNotIn('id', $gruposExistentes)->findAll();
+        else
+            $data['gruposDisponiveis'] = $this->grupoModel->where('id !=', 2)->findAll();
+        
+        return view('Usuarios/grupos', $data);
+    }
+
+    public function salvarGrupos()
+    {
+        $retorno['token'] = csrf_hash();
+        $post = $this->request->getPost();
+        $usuario = $this->buscaUsuarioOu404($post['id']);
+
+        if (empty($post['grupos_id'])) {
+            $retorno['erro'] = 'Por favor, verifique os erros abaixo e tente novamente';
+            $retorno['erros_model'] = ['grupo_id' => 'Escolha uma ou mais grupos para salvar'];
+            return $this->response->setJSON($retorno);
+        }
+
+        if (in_array(2, $post['grupos_id'])) {
+            $retorno['erro'] = 'Por favor, verifique os erros abaixo e tente novamente';
+            $retorno['erros_model'] = ['grupo_id' => 'O grupo de cliente não poderá ser atribuído de forma manual'];
+            return $this->response->setJSON($retorno);
+        }
+
+        if (in_array(1, $post['grupos_id'])) {
+            $grupoAdmin = [
+                'grupo_id' => 1,
+                'usuario_id' => $usuario->id
+            ];
+            $this->grupoUsuarioModel->insert($grupoAdmin);
+
+            $this->grupoUsuarioModel
+                ->where('grupo_id !=', 1)
+                ->where('usuario_id', $usuario->id)
+                ->delete();
+        } else {
+            $gruposPush = [];
+            foreach ($post['grupos_id'] as $grupo) {
+                array_push($gruposPush, [
+                    'grupo_id' => $grupo,
+                    'usuario_id' => $usuario->id
+                ]);
+            }
+            $this->grupoUsuarioModel->insertBatch($gruposPush);
+        }
+
+        session()->setFlashData('sucesso', 'Definições de grupos alteradas com sucesso!');
+        return $this->response->setJSON($retorno);   
+    }
+
+    public function removeGrupo(int $id = null)
+    {
+        if ($this->request->getMethod() == 'post') {
+            $grupoUsuario = $this->buscaGrupoUsuarioOu404($id);
+
+            if ($grupoUsuario->grupo_id == 2)
+                return redirect()->to(site_url("usuarios/exibir/$grupoUsuario->usuario_id"))->with('info', 'Não é permitida a exclusão do usuário do grupo de clientes.');
+
+            $this->grupoUsuarioModel->delete($id);
+            return redirect()->to(site_url("usuarios/grupos/$grupoUsuario->usuario_id"))->with('sucesso', 'Grupo de permissão removida com sucesso.');
+        }
+
+        return redirect()->back();
+    }
+
     private function buscaUsuarioOu404(int $id = null)
     {
         if (!$id || !$usuario = $this->usuarioModel->withDeleted(true)->find($id))
             throw PageNotFoundException::forPageNotFound("Não encontramos o usuário $id");
 
         return $usuario;
+    }
+
+    private function buscaGrupoUsuarioOu404(int $id = null)
+    {
+        if (!$id || !$grupoUsuario = $this->grupoUsuarioModel->find($id))
+            throw PageNotFoundException::forPageNotFound("Não encontramos a associação ao grupo de ID: $id");
+
+        return $grupoUsuario;
     }
 
     private function removeImagem(string $imagem)

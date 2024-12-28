@@ -41,7 +41,7 @@
           <div class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
             <a class="dropdown-item w-100" href="<?php echo site_url("usuarios/editar/$usuario->id"); ?>">Editar Usuário</a>
             <a class="dropdown-item w-100" href="<?php echo site_url("usuarios/excluir/$usuario->id"); ?>">Excluir Usuário</a>
-            <a class="dropdown-item w-100" href="<?php echo site_url("usuarios/ativarDesativar/$usuario->id"); ?>"><?php echo (($usuario->ativo) ? 'Desativar' : 'Ativar'); ?></a>
+            <a class="dropdown-item w-100" href="<?php echo site_url("usuarios/grupos/$usuario->id"); ?>">Gerenciar os Grupos de Acesso</a>
           </div>
         </div>
 
