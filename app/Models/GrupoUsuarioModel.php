@@ -34,4 +34,20 @@ class GrupoUsuarioModel extends Model
             ->groupBy('grupos.nome')
             ->paginate($paginacao);
     }
+    
+    /**
+     * Grupo que recupera o grupo no qual o usuário está logado. Utilizado apenas para verificar se 
+     * o usuário é um cliente ou um administrador
+     *
+     * @param  integer $grupoId
+     * @param  integer $usuarioId
+     * @return null|object
+     */
+    public function usuarioEstaNoGrupo(int $grupoId, int $usuarioId)
+    {
+        return $this
+            ->where('grupo_id', $grupoId)
+            ->where('usuario_id', $usuarioId)
+            ->first();
+    }
 }

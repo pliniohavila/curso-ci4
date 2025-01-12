@@ -162,7 +162,11 @@
               <div aria-labelledby="languages" class="dropdown-menu"><a rel="nofollow" href="#" class="dropdown-item"> <img src="<?php echo site_url('recursos/') ?>img/flags/16/DE.png" alt="English" class="mr-2"><span>German</span></a><a rel="nofollow" href="#" class="dropdown-item"> <img src="<?php echo site_url('recursos/') ?>img/flags/16/FR.png" alt="English" class="mr-2"><span>French  </span></a></div>
             </div>
             <!-- Log out               -->
-            <div class="list-inline-item logout">                   <a id="logout" href="login.html" class="nav-link">Logout <i class="icon-logout"></i></a></div>
+            <div class="list-inline-item logout"> 
+              <a id="logout" href="<?php echo site_url('logout') ?>" class="nav-link">
+                Sair <i class="icon-logout"></i>
+              </a>
+            </div>
           </div>
         </div>
       </nav>
@@ -174,7 +178,8 @@
         <div class="sidebar-header d-flex align-items-center">
           <div class="avatar"><img src="<?php echo site_url('recursos/') ?>img/avatar-6.jpg" alt="..." class="img-fluid rounded-circle"></div>
           <div class="title">
-            <h1 class="h5">Mark Stephen</h1>
+            
+            <h1 class="h5"><?php echo session()->get('usuario_name'); ?></h1>
             <p>Web Designer</p>
           </div>
         </div>
