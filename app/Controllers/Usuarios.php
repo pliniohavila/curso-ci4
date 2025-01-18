@@ -349,6 +349,49 @@ class Usuarios extends BaseController
         return redirect()->back();
     }
 
+    public function editarSenha()
+    {
+        // Don't put the ACL here
+        $data = ['titulo' => 'Edite a sua senha de acesso'];
+
+        // dd(usuario_logado());
+
+        return view('Usuarios/editar_senha', $data);
+    }
+
+    public function atualizaSenha()
+    {
+        $retorno['token'] = csrf_hash();
+        $post = $this->request->getPost();         
+        
+        extract($post, EXTR_OVERWRITE); // Extract values from POST body
+
+        if (!usuario_logado()->verificaPassword($current_password)) {
+            $retorno['erro'] = 'Alguma coisa está errada 🫠';
+            $retorno['erros_model'] = ['current_password' => 'Senha informada como atual é inválida 😳'];
+            return $this->response->setJSON($retorno);
+        }
+
+        $usuario = usuario_logado();
+
+        $usuario->fill($post);
+
+        if (!$usuario->hasChanged()) {
+            $retorno['info'] = 'Não foi informado dados novos para atualizar.';
+            return $this->response->setJSON($retorno);
+        }
+
+        if ($this->usuarioModel->save($usuario)) {
+            $retorno['sucesso'] = 'Senha atualizada com sucesso.';
+            return $this->response->setJSON($retorno);
+        }
+            
+        $retorno['erro'] = 'Alguma coisa está errada 🫠';
+        $retorno['erros_model'] = $this->usuarioModel->errors();
+        
+        return $this->response->setJSON($retorno);
+    }
+
     private function buscaUsuarioOu404(int $id = null)
     {
         if (!$id || !$usuario = $this->usuarioModel->withDeleted(true)->find($id))

@@ -43,7 +43,7 @@ class Grupos extends BaseController
         return view('Grupos/exibir', $data);
     }
 
-    public function criar(): string|RedirectResponse
+    public function criar()
     {
         $grupo = new Grupo();
 
@@ -53,7 +53,7 @@ class Grupos extends BaseController
         return view('Grupos/criar', $data);
     }
 
-    public function editar(int $id): string|RedirectResponse
+    public function editar(int $id)
     {
         $grupo = $this->buscaGrupoOu404($id);
 

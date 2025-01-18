@@ -31,7 +31,7 @@ class Auth
 
     if (!$usuario) return false;
     
-    if (!($usuario->verificaSenha($password))) return false;
+    if (!($usuario->verificaPassword($password))) return false;
     
     if (!($usuario->ativo)) return false;
 

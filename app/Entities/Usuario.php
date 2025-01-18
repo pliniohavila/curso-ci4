@@ -10,7 +10,7 @@ class Usuario extends Entity
     protected $dates   = ['criado_em', 'atualizado_em', 'deletado_em_at'];
     protected $casts   = [];
 
-    public function verificaSenha(string $senha): bool
+    public function verificaPassword(string $senha): bool
     {
         return password_verify($senha, $this->password_hash);
     }
