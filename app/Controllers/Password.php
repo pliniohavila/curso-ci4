@@ -36,8 +36,17 @@ class Password extends BaseController
         } 
         
         $usuario->iniciaPasswordReset();
+        $this->usuarioModel->save($usuario);
+
+        // TODO: enviar e-mail de verificação
+
+        return $this->response->setJSON([]);
+    }
+
+    public function resetEnviado()
+    {
+        $data['titulo'] = 'E-mail de recuperação enviado.';
         
-        
-        
+        return view('Password/reset_enviado', $data);
     }
 }
