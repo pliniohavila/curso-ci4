@@ -18,9 +18,9 @@
     <div class="info d-flex align-items-center">
       <div class="content">
         <div class="logo">
-          <h1>Ordem</h1>
+          <h1>Esqueci a Senha</h1>
         </div>
-        <p>Aplicação para gerenciamento para prestadoras de serviços</p>
+        <p>Informe o seu e-mail de acesso para recuperar a senha, seu esquecido.</p>
       </div>
     </div>
   </div>
@@ -30,21 +30,15 @@
       <div class="content">
         <?php echo form_open('/', ['id' => 'form', 'class' => 'form-validate']); ?>
         <?php echo $this->include('Layout/_mensagens') ?>
-        <div id="response">
-        </div>
+        <div id="response"></div>
+        
         <div class="form-group">
           <input id="email" type="text" name="email" required data-msg="Seu e-mail" class="input-material">
-          <label for="email" class="label-material">E-mail</label>
+          <label for="email" class="label-material">Informe o seu E-mail</label>
         </div>
-        <div class="form-group">
-          <input id="password" type="password" name="password" required data-msg="Sua senha" class="input-material">
-          <label for="password" class="label-material">Senha</label>
-        </div>
-        <input type="submit" id="btn-login" class="btn btn-primary" value="Entrar">
+      
+        <input type="submit" id="btn-login" class="btn btn-primary" value="Enviar E-mail de Recuperar Senha">
         <?php echo form_close(); ?>
-        <a href="<?php echo site_url('esqueci'); ?>" class="forgot-pass">Esqueceu a sua senha?</a>
-        <br>
-        <small>Não tem uma conta? </small><a href="register.html" class="signup">Criar conta</a>
 
       </div>
     </div>
@@ -63,7 +57,7 @@
 
       $.ajax({
         type: 'POST',
-        url: '<?php echo site_url('login/criar'); ?>',
+        url: '<?php echo site_url('Password/processaEsqueci'); ?>',
         data: new FormData(this),
         dataType: 'json',
         contentType: false,
@@ -80,7 +74,7 @@
 
           $('[name=csrf_ordem]').val(response.token)
           if (!response.erro)
-            window.location.href = `<?php echo site_url(); ?>${response.redirect}`
+            window.location.href = `<?php echo site_url('password/resetEnviado'); ?>`
 
           if (response.erro)
             $('#response').html(`<div class="alert alert-danger">${response.erro}</div>`)
